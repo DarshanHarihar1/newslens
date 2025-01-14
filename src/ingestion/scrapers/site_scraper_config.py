@@ -1,23 +1,22 @@
-# scrapers/site_scraper_config.py
-
-SITE_CONFIGS = [
+RSS_CONFIGS = [
     {
-        "name": "ExampleSiteA",
-        "start_url": "https://www.example-site-a.com",
-        "article_container_xpath": "//div[@class='article']",
-        "title_xpath": ".//h2[@class='title']",
-        "link_xpath": ".//a",
-        "pagination_enabled": True,
-        "pagination_xpath": "//a[@class='next-page']",
+        "name": "The Hindu Sports",
+        "url": "https://www.thehindu.com/sport/feeder/default.rss"
     },
     {
-        "name": "ExampleSiteB",
-        "start_url": "https://www.example-site-b.com/news",
-        "article_container_xpath": "//div[@class='post']",
-        "title_xpath": ".//h1",
-        "link_xpath": ".//a",
-        "pagination_enabled": False,
-        # No pagination for this site
+        "name": "ESPN Sports",
+        "url": "https://www.espn.com/espn/rss/news"
     },
-    # Add more site configs as needed
+    {
+        "name": "Sky Sports Football",
+        "url": "https://www.skysports.com/rss/12040"
+    },
+    {
+        "name": "Yahoo Sports",
+        "url": "https://sports.yahoo.com/rss/"
+    },
+    {
+        "name": "BBC Sports",
+        "url": "http://feeds.bbci.co.uk/sport/rss.xml"
+    }
 ]
