@@ -1,34 +1,56 @@
-# vector_db/db_manager.py
-
 import os
-import pinecone
+from typing import List, Dict, Any
+from pinecone import Pinecone, ServerlessSpec
 
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "YOUR_PINECONE_KEY")
-PINECONE_ENV = os.getenv("PINECONE_ENV", "YOUR_ENV")
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "pcsk_2BFn6U_DaTpsuiJkUfvp9hvAwe7C5ztnb4KS9MRB4zoYTWLdjS4nzrQZkjAEi4TCXaxq5D")
+PINECONE_ENV = os.getenv("PINECONE_ENV", "us-east-1")  # or whichever region you use
 INDEX_NAME = "veritas-rss"
 
-def init_pinecone():
-    # Initialize Pinecone
-    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
-    if INDEX_NAME not in pinecone.list_indexes():
-        pinecone.create_index(name=INDEX_NAME, dimension=1536)  # dimension depends on embedding model
-    return pinecone.Index(INDEX_NAME)
+class PineconeClient:
+    def __init__(self, index_name=INDEX_NAME):
+        # Create a Pinecone instance
+        # API key is mandatory, region is specified via ServerlessSpec
+        self.pc = Pinecone(api_key=PINECONE_API_KEY)
+        
+        # Check if the index exists
+        existing_indexes = self.pc.list_indexes().names()
+        if index_name not in existing_indexes:
+            # Create the index with desired dimension and metric
+            self.pc.create_index(
+                name=index_name,
+                dimension=768,             # depends on your embedding model
+                metric='cosine',            # or 'dotproduct', 'euclidean'
+                spec=ServerlessSpec(
+                    cloud='aws',
+                    region=PINECONE_ENV      # e.g. 'us-west-1', 'us-east-1', etc.
+                )
+            )
+        
+        # Get a handle to the index
+        self.index = self.pc.Index(index_name)
 
-def upsert_articles(index, articles_with_embeddings):
-    """
-    articles_with_embeddings: list of dicts with:
-        {
-          "id": str,  # unique ID for the article
-          "embedding": List[float],
-          "metadata": dict with article metadata
-        }
-    """
-    vectors = []
-    for item in articles_with_embeddings:
-        vectors.append((
-            item["id"],
-            item["embedding"],
-            item["metadata"]
-        ))
+    def upsert_articles(self, articles_with_embeddings: List[Dict[str, Any]]):
+        """
+        articles_with_embeddings: list of dicts with:
+            {
+                "id": str,            # unique ID for the article
+                "embedding": List[float],
+                "metadata": dict      # arbitrary metadata about the article
+            }
+        """
+        vectors = []
+        for item in articles_with_embeddings:
+            vectors.append((
+                item["id"],
+                item["embedding"],
+                item["metadata"]
+            ))
+        
+        self.index.upsert(vectors=vectors)
 
-    index.upsert(vectors=vectors)
+    def semantic_search(self, query_embedding: List[float], top_k=5):
+        """
+        Example method for performing a query with an embedding.
+        """
+        response = self.index.query(vector=query_embedding, top_k=top_k, includeMetadata=True)
+        return response.matches

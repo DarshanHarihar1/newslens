@@ -1,11 +1,10 @@
 # scrapers/scraper_main.py
 
-from .site_scraper_config import RSS_CONFIGS
-from .rss_scraper import fetch_rss_feed
-
-from ..utils.logger import AppLogger
+from src.scrapers.site_scraper_config import RSS_CONFIGS
+from src.scrapers.rss_scraper import fetch_rss_feed
+from src.utils.logger import AppLogger
 from ..embeddings.embedding_pipeline import generate_embedding
-from ..vector_db.db_manager import init_pinecone, upsert_articles
+from ..vector_db.db_manager import PineconeClient
 
 import uuid  # for generating unique IDs
 
@@ -13,7 +12,7 @@ logger = AppLogger(__name__)
 
 def run_all_scrapers():
     # Initialize Pinecone index (or another vector DB)
-    index = init_pinecone()
+    pc_client = PineconeClient(index_name="veritas-rss")
 
     all_articles = []
 
@@ -48,7 +47,8 @@ def run_all_scrapers():
             })
 
         # Upsert into vector DB
-        upsert_articles(index, articles_with_embeddings)
+        pc_client.upsert_articles(articles_with_embeddings)
+        logger.info(f"Upserted {len(articles_with_embeddings)} articles to Pinecone")
         all_articles.extend(site_articles)
 
     logger.info(f"Total articles processed: {len(all_articles)}")
