@@ -1,9 +1,17 @@
 import os
 from typing import List, Dict, Any
 from pinecone import Pinecone, ServerlessSpec
+from utils.load_config import load_config
 
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "pcsk_2BFn6U_DaTpsuiJkUfvp9hvAwe7C5ztnb4KS9MRB4zoYTWLdjS4nzrQZkjAEi4TCXaxq5D")
-PINECONE_ENV = os.getenv("PINECONE_ENV", "us-east-1")  # or whichever region you use
+CONFIG_PATH = "newslens/configs/config_map.YAML"
+
+config = load_config(CONFIG_PATH)  
+
+PINECONE_API_KEY = config["data"].get("PINECONE_API_KEY")
+PINECONE_ENV = config["data"].get("PINECONE_ENV", "us-west-1")
+
+# PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "pcsk_2BFn6U_DaTpsuiJkUfvp9hvAwe7C5ztnb4KS9MRB4zoYTWLdjS4nzrQZkjAEi4TCXaxq5D")
+# PINECONE_ENV = os.getenv("PINECONE_ENV", "us-east-1")  # or whichever region you use
 INDEX_NAME = "veritas-rss"
 
 class PineconeClient:
