@@ -22,17 +22,17 @@ class AppLogger:
         )
 
     def info(self, message: str) -> None:
-        """Logs an info message."""
+        """Logs an info message"""
         self.logger.info(message)
 
     def error(self, message: str) -> None:
-        """Logs an error message."""
+        """Logs an error message"""
         self.logger.error(message)
 
     def debug(self, message: str) -> None:
-        """Logs a debug message."""
+        """Logs a debug message"""
         self.logger.debug(message)
 
     def warning(self, message: str) -> None:
-        """Logs a warning message."""
+        """Logs a warning message"""
         self.logger.warning(message)
